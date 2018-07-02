@@ -103,6 +103,7 @@ namespace SMSApiManager
                 signingCredentials,
                 expiration: TimeSpan.FromSeconds(1000)
                 );
+
             services.AddAuthorization(options =>
             {
 
