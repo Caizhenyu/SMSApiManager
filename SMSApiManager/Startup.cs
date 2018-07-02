@@ -86,6 +86,7 @@ namespace SMSApiManager
                 RequireExpirationTime = true,
 
             };
+
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
             //这个集合模拟用户权限表,可从数据库中查询出来
             var permission = new List<Permission> {

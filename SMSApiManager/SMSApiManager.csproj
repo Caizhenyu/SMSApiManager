@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\study\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT.csproj" />
+    <ProjectReference Include="..\AuthorizePolicy.JWT\AuthorizePolicy.JWT.csproj" />
   </ItemGroup>
 
 </Project>
