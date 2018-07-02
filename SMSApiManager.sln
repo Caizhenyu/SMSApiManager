@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMSApiManager", "SMSApiManager\SMSApiManager.csproj", "{AD3AD045-F26F-4774-A341-3C5916A3AA66}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizePolicy.JWT", "..\..\study\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT.csproj", "{C2C240B6-7A87-497E-8BB5-5581CC5B916D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{AD3AD045-F26F-4774-A341-3C5916A3AA66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD3AD045-F26F-4774-A341-3C5916A3AA66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD3AD045-F26F-4774-A341-3C5916A3AA66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2C240B6-7A87-497E-8BB5-5581CC5B916D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2C240B6-7A87-497E-8BB5-5581CC5B916D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2C240B6-7A87-497E-8BB5-5581CC5B916D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2C240B6-7A87-497E-8BB5-5581CC5B916D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SMSApiManager.Controllers
 {
+    [Authorize("Permission")]
     [Route("api/[controller]")]
+    [EnableCors("MyDomain")]
     public class ValuesController : Controller
     {
         // GET api/values
