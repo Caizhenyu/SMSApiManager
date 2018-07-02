@@ -34,6 +34,9 @@ namespace SMSApiManager.Models
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
 
+        [DataType(DataType.Date)]
+        public DateTime Birthday { get; set; }
+
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
