@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMSApiManager", "SMSApiManager\SMSApiManager.csproj", "{AD3AD045-F26F-4774-A341-3C5916A3AA66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SMSApiManager", "SMSApiManager\SMSApiManager.csproj", "{AD3AD045-F26F-4774-A341-3C5916A3AA66}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizePolicy.JWT", "..\..\study\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT\AuthorizePolicy.JWT.csproj", "{C2C240B6-7A87-497E-8BB5-5581CC5B916D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AuthorizePolicy", "AuthorizePolicy", "{41021F14-998F-4FCC-B3EB-DD70D128154D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +26,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C2C240B6-7A87-497E-8BB5-5581CC5B916D} = {41021F14-998F-4FCC-B3EB-DD70D128154D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C32B865-DA53-44E9-9BF3-C0401821EDF2}
