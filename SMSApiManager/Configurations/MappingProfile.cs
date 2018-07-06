@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using SMSApiManager.Models;
+using SMSApiManager.Models.ManageViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace SMSApiManager.Configurations
     {
         public MappingProfile()
         {
-            //CreateMap<>
+            CreateMap<ApplicationUser, AccountDetailModel>();
         }         
 
     }

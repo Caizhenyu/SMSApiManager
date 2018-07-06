@@ -1,4 +1,5 @@
 ﻿using AuthorizePolicy.JWT;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -101,7 +102,7 @@ namespace SMSApiManager
                 audienceConfig["Issuer"],
                 audienceConfig["Audience"],
                 signingCredentials,
-                expiration: TimeSpan.FromSeconds(1000)
+                expiration: TimeSpan.FromSeconds(3600)
                 );
 
             services.AddAuthorization(options =>
@@ -149,12 +150,16 @@ namespace SMSApiManager
             //services.AddSingleton<IAuthorizationHandler,
             //                      ContactSystemAuthorizationHandler>();
 
+            services.AddAutoMapper();
+
             services.AddMvc(config =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                                  .RequireAuthenticatedUser()
                                  .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
+
+                config.RespectBrowserAcceptHeader = true;
             });
         }
 

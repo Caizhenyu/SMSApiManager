@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthorizePolicy.JWT;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using SMSApiManager.Data;
 using SMSApiManager.Models;
 using SMSApiManager.Models.AccountViewModels;
+using SMSApiManager.Models.ManageViewModels;
 using SMSApiManager.Services;
 
 namespace SMSApiManager.Controllers
@@ -34,6 +36,7 @@ namespace SMSApiManager.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IMapper _mapper;
 
         public AccountController(
             PermissionRequirement requirement,
@@ -42,7 +45,8 @@ namespace SMSApiManager.Controllers
             RoleManager<IdentityRole> roleManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            ApplicationDbContext applicationDbContext)
+            ApplicationDbContext applicationDbContext,
+            IMapper mapper)
         {
             _requirement = requirement;
             _userManager = userManager;
@@ -51,89 +55,85 @@ namespace SMSApiManager.Controllers
             _emailSender = emailSender;
             _logger = logger;
             _applicationDbContext = applicationDbContext;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost(Name = "Login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+                return BadRequest(model);
+            }
+            // This doesn't count login failures towards account lockout
+            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
-                if (result.Succeeded)
+            if (result.Succeeded)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                var roles = await _userManager.GetRolesAsync(user);
+                //var roles = from role in _applicationDbContext.Roles
+                //            join userRole in _applicationDbContext.UserRoles
+                //            on role.Id equals userRole.RoleId
+                //            select role.Name;
+
+                if (roles.Count() == 0)
                 {
-                    var user = await _userManager.FindByEmailAsync(model.Email);
-
-                    var roles = await _userManager.GetRolesAsync(user);
-                    //var roles = from role in _applicationDbContext.Roles
-                    //            join userRole in _applicationDbContext.UserRoles
-                    //            on role.Id equals userRole.RoleId
-                    //            select role.Name;
-
-                    if (roles.Count() == 0)
+                    switch (user.Level)
                     {
-                        switch (user.Level)
-                        {
-                            case Level.Admin:
-                                if (!await _roleManager.RoleExistsAsync(Level.Admin.ToString()))
-                                {
-                                    await _roleManager.CreateAsync(new IdentityRole(Level.Admin.ToString()));
-                                }
-                                await _userManager.AddToRoleAsync(user, Level.Admin.ToString());
-                                break;
+                        case Level.Admin:
+                            if (!await _roleManager.RoleExistsAsync(Level.Admin.ToString()))
+                            {
+                                await _roleManager.CreateAsync(new IdentityRole(Level.Admin.ToString()));
+                            }
+                            await _userManager.AddToRoleAsync(user, Level.Admin.ToString());
+                            break;
 
-                            case Level.SuperAdmin:
-                                if (!await _roleManager.RoleExistsAsync(Level.SuperAdmin.ToString()))
-                                {
-                                    await _roleManager.CreateAsync(new IdentityRole(Level.SuperAdmin.ToString()));
-                                }
-                                await _userManager.AddToRoleAsync(user, Level.SuperAdmin.ToString());
-                                break;
+                        case Level.SuperAdmin:
+                            if (!await _roleManager.RoleExistsAsync(Level.SuperAdmin.ToString()))
+                            {
+                                await _roleManager.CreateAsync(new IdentityRole(Level.SuperAdmin.ToString()));
+                            }
+                            await _userManager.AddToRoleAsync(user, Level.SuperAdmin.ToString());
+                            break;
 
-                            case Level.System:
-                                if (!await _roleManager.RoleExistsAsync(Level.System.ToString()))
-                                {
-                                    await _roleManager.CreateAsync(new IdentityRole(Level.System.ToString()));
-                                }
-                                await _userManager.AddToRoleAsync(user, Level.System.ToString());
-                                break;
-                        }
-
-                        roles = await _userManager.GetRolesAsync(user);
+                        case Level.System:
+                            if (!await _roleManager.RoleExistsAsync(Level.System.ToString()))
+                            {
+                                await _roleManager.CreateAsync(new IdentityRole(Level.System.ToString()));
+                            }
+                            await _userManager.AddToRoleAsync(user, Level.System.ToString());
+                            break;
                     }
 
-                    
-                    //如果是基于用户的授权策略，这里要添加用户;如果是基于角色的授权策略，这里要添加角色
-                    var claims = new Claim[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.Role, roles.FirstOrDefault()), new Claim(ClaimTypes.Expiration, DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString()) };
-                    //用户标识
-                    var identity = new ClaimsIdentity(JwtBearerDefaults.AuthenticationScheme);
-                    identity.AddClaims(claims);
+                    roles = await _userManager.GetRolesAsync(user);
+                }
 
-                    var token = JwtToken.BuildJwtToken(claims, _requirement);
-                    return new JsonResult(token);
 
-                }
-                else if (result.IsLockedOut)
-                {
-                    //_logger.LogWarning("User account locked out.");
-                    return RedirectToAction(nameof(Lockout));
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Ok(model);
-                }
+                //如果是基于用户的授权策略，这里要添加用户;如果是基于角色的授权策略，这里要添加角色
+                var claims = new Claim[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.Role, roles.FirstOrDefault()), new Claim(ClaimTypes.Expiration, DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString()) };
+                //用户标识
+                var identity = new ClaimsIdentity(JwtBearerDefaults.AuthenticationScheme);
+                identity.AddClaims(claims);
+
+                var token = JwtToken.BuildJwtToken(claims, _requirement);
+                return Ok(token);
+
             }
-
-            // If we got this far, something failed, redisplay form
-            return new JsonResult(new
+            else if (result.IsLockedOut)
             {
-                Status = false,
-                Message = "认证失败"
-            });
+                //_logger.LogWarning("User account locked out.");
+                return RedirectToAction(nameof(Lockout));
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                //return Ok(model);
+                return BadRequest(model);
+            }
         }
 
         [HttpPost]
@@ -141,35 +141,41 @@ namespace SMSApiManager.Controllers
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             //ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserNo = model.UserNo, Name = model.Name, UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created a new account with password.");
-
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                    await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-
-                    //await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
-                    return new JsonResult(new
-                    {
-                        IsSuccess = true,
-                        Message = "注册成功"
-                    });
-                }
-                AddErrors(result);
+                return BadRequest(model);
             }
 
+            var user = new ApplicationUser { UserNo = model.UserNo, Name = model.Name, UserName = model.Email, Email = model.Email };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User created a new account with password.");
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+
+                //await _signInManager.SignInAsync(user, isPersistent: false);
+                _logger.LogInformation("User created a new account with password.");
+                return Created("Login", model);
+            }
+            //AddErrors(result);
+
             // If we got this far, something failed, redisplay form
-            return Ok(model);
+            return StatusCode(409, result);
+        }
+
+        [HttpGet(Name = "AccountDetail")]
+        public async Task<IActionResult> Detail()
+        {
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+            var accountDetail = _mapper.Map<AccountDetailModel>(user);
+
+            return Ok(accountDetail);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
@@ -181,18 +187,14 @@ namespace SMSApiManager.Controllers
         [HttpGet]
         public IActionResult Denied()
         {
-            return new JsonResult(new
-            {
-                Status = false,
-                Message = "你无权限访问"
-            });
+            return Forbid();
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Lockout()
         {
-            return Ok();
+            return StatusCode(423, "Account Locked");
         }
 
         [HttpGet]
@@ -211,6 +213,7 @@ namespace SMSApiManager.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, code);
             return Ok(result.Succeeded ? "ConfirmEmail" : "Error");
         }
+
 
         #region Helpers
 
