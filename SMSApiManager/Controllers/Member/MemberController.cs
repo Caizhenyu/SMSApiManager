@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
@@ -13,6 +14,7 @@ using SMSApiManager.Models;
 
 namespace SMSApiManager.Controllers.Memberc
 {
+    [AllowAnonymous]
     [Produces("application/json")]
     [Route("api/Member")]
     public class MemberController : Controller
@@ -30,7 +32,7 @@ namespace SMSApiManager.Controllers.Memberc
         /// <param name="member"></param>
         /// <returns></returns>
         [HttpPost("addMember")]
-        public ActionResult addMenber(Member member)
+        public ActionResult AddMenber(Member member)
         {
             if (!ModelState.IsValid)
             {
@@ -57,7 +59,7 @@ namespace SMSApiManager.Controllers.Memberc
         /// <param name="memberNo"></param>
         /// <returns></returns>
         [HttpGet("getMember")]
-        public ActionResult getMember(string memberNo)
+        public ActionResult GetMember(string memberNo)
         {
             if (!string.IsNullOrEmpty(memberNo))
             {
@@ -65,7 +67,15 @@ namespace SMSApiManager.Controllers.Memberc
                 var mem = db.Member.SingleOrDefault(x => x.MemberNo == memberNo);
                 if (mem != null)
                 {
-                    return Ok(mem);
+                    M m = new M()
+                    {
+                        Name =mem.Name,
+                        phoneNumber =mem.PhoneNumber,
+                        Birthday =mem.Birthday.ToString("yyyy-MM-dd"),
+                        Age =GetAge(mem.Birthday),
+                        memberNO= mem.MemberNo
+                    };
+                    return Ok(m);
                 }
                 else
                 {
@@ -83,7 +93,7 @@ namespace SMSApiManager.Controllers.Memberc
         /// </summary>
         /// <returns></returns>
         [HttpGet("updateMember")]
-        public ActionResult updateMember(string memberNo, string memberName, DateTime birthday, string phone)
+        public ActionResult UpdateMember(string memberNo, string memberName, DateTime birthday, string phone)
         {
             if (string.IsNullOrEmpty(memberNo))
             {
@@ -198,7 +208,7 @@ namespace SMSApiManager.Controllers.Memberc
             }
         }
         [HttpGet("delectMember")]
-        public IActionResult delectMember(string memberNo)
+        public IActionResult DelectMember(string memberNo)
         {
             if (string.IsNullOrEmpty(memberNo))
             {
@@ -214,9 +224,10 @@ namespace SMSApiManager.Controllers.Memberc
             return Ok("删除成功");
         }
         [HttpGet("getMembetList")]
-        public IActionResult getMemberList(string sort, string searchValue)
+        public IActionResult getMemberList(int pageSize,int pageIndex, string sort, string searchValue)
         {
-            var memberList = (from a in db.Member.Where(x => x.Status == MemberStatus.Normal)
+            var memberList = (from a in db.Member.Where(x => x.Status == MemberStatus.Normal).Skip(pageSize * (pageIndex - 1))
+                             .Take(pageSize)
                               select new
                               {
                                   a.MemberNo,
@@ -228,7 +239,7 @@ namespace SMSApiManager.Controllers.Memberc
                                   a.MemberNo,
                                   a.Name,
                                   a.Birthday,
-                                  age = getAge(a.Birthday),
+                                  age = GetAge(a.Birthday),
                                   a.PhoneNumber
                               });
 
@@ -258,13 +269,23 @@ namespace SMSApiManager.Controllers.Memberc
                 return BadRequest("暂无数据！");
             }
         }
+        [HttpPost("delectMemberList")]
+        public IActionResult DelectMemberList(List<string> memberNos)
+        {
+            var list = memberNos;
+            foreach (var memNo in memberNos)
+            {
+                string test =memNo;
+            }
+            return Ok("删除成功");
+        }
 
         /// <summary>
         /// 计算年龄
         /// </summary>
         /// <param name="birthday"></param>
         /// <returns></returns>
-        private int getAge(DateTime birthday)
+        private int GetAge(DateTime birthday)
         {
             DateTime time = DateTime.Now;
             int age = time.Year - birthday.Year;
@@ -275,5 +296,16 @@ namespace SMSApiManager.Controllers.Memberc
             }
             return age;
         }
+    }
+    class M
+    {
+        public string memberNO { set; get; }
+        public string phoneNumber { set; get; }
+
+        public int Age { set; get; }
+
+        public string Birthday { set; get; }
+
+        public string Name { set; get; }
     }
 }

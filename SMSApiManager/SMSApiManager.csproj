@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="upload\xls\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
