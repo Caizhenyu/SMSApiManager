@@ -150,6 +150,7 @@ namespace SMSApiManager
             //services.AddSingleton<IAuthorizationHandler,
             //                      ContactSystemAuthorizationHandler>();
 
+            //注入自动映射服务，提供 Model to DTO 和 DTO to Model 的映射
             services.AddAutoMapper();
 
             services.AddMvc(config =>

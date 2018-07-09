@@ -132,7 +132,7 @@ namespace SMSApiManager.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 //return Ok(model);
-                return BadRequest(model);
+                return BadRequest(ModelState);
             }
         }
 
@@ -188,6 +188,39 @@ namespace SMSApiManager.Controllers
         public IActionResult Denied()
         {
             return Forbid();
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordAbsolutely(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(model);
+            }
+            if(string.IsNullOrEmpty(model.Code) || model.Code != "FakeFakeCode")
+            {
+                return StatusCode(422, "Error Code");
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if(user == null)
+            {
+                return NotFound("No this user");
+            }
+
+            string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var identityResult = await _userManager.ResetPasswordAsync(user, resetPasswordToken, model.Password);
+
+            if(identityResult.Succeeded)
+            {
+                return StatusCode(204, "Reset Password Succeeded");
+            }
+            else
+            {
+                return StatusCode(500, identityResult.Errors);
+            }
         }
 
         [HttpGet]
