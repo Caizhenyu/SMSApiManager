@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SMSApiManager.Models;
 using SMSApiManager.Models.ManageViewModels;
+using SMSApiManager.Models.MemberViewModles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace SMSApiManager.Configurations
         public MappingProfile()
         {
             CreateMap<ApplicationUser, AccountDetailModel>();
+            CreateMap<MemberView, Member>();
         }         
 
     }

@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using SMSApiManager.Data;
 using SMSApiManager.Models;
+using SMSApiManager.Models.MemberViewModles;
 
 namespace SMSApiManager.Controllers.Memberc
 {
@@ -20,10 +23,14 @@ namespace SMSApiManager.Controllers.Memberc
     public class MemberController : Controller
     {
         private ApplicationDbContext db;
+        private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public MemberController(ApplicationDbContext _db)
+        public MemberController(ApplicationDbContext _db, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             db = _db;
+            _mapper = mapper;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -32,23 +39,26 @@ namespace SMSApiManager.Controllers.Memberc
         /// <param name="member"></param>
         /// <returns></returns>
         [HttpPost("addMember")]
-        public ActionResult AddMenber(Member member)
+        public async Task<IActionResult> AddMenber(MemberView member)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            Member _member = new Member()
-            {
-                MemberNo = member.MemberNo,
-                Name = member.Name,
-                Birthday = member.Birthday,
-                PhoneNumber = member.PhoneNumber,
-                Status = MemberStatus.Normal,
-                Email = member.Email,
-                Address = member.Address,
-                OwnerId = member.OwnerId,
-            };
+            var _member = _mapper.Map<Member>(member);
+            //Member _member = new Member()
+            //{
+            //    MemberNo = member.MemberNo,
+            //    Name = member.Name,
+            //    Birthday = member.Birthday,
+            //    PhoneNumber = member.PhoneNumber,
+            //    Status = MemberStatus.Normal,
+            //    Email = member.Email,
+            //    Address = member.Address,
+            //    OwnerID = member.OwnerID,
+            //};
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+            _member.OwnerID = user.Id;
             db.Member.Add(_member);
             db.SaveChanges();
             return Ok("保存成功!");
@@ -93,38 +103,43 @@ namespace SMSApiManager.Controllers.Memberc
         /// </summary>
         /// <returns></returns>
         [HttpGet("updateMember")]
-        public ActionResult UpdateMember(string memberNo, string memberName, DateTime birthday, string phone)
+        public ActionResult UpdateMember(int memberID, string memberName, DateTime birthday, string phone)
         {
-            if (string.IsNullOrEmpty(memberNo))
+            try
             {
-                return BadRequest("党员编号不能为空!");
+                var mem = db.Member.SingleOrDefault(x =>x.MemberId ==memberID);
+                if (mem == null)
+                {
+                    return BadRequest("查无党员信息");
+                }
+                if (!string.IsNullOrEmpty(memberName))
+                {
+                    mem.Name = memberName;
+                }
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    mem.PhoneNumber = phone;
+                }
+                if (birthday != null)
+                {
+                    mem.Birthday = birthday;
+                }
+                db.SaveChanges();
+                return Ok("修改成功");
             }
-            var mem = db.Member.SingleOrDefault(x => x.MemberNo == memberNo);
-            if (mem == null)
+            catch (Exception)
             {
-                return BadRequest("查无此人");
+
+                throw new Exception("党员ID出错");
             }
-            if (!string.IsNullOrEmpty(memberName))
-            {
-                mem.Name = memberName;
-            }
-            if (!string.IsNullOrEmpty(phone))
-            {
-                mem.PhoneNumber = phone;
-            }
-            if (birthday != null)
-            {
-                mem.Birthday = birthday;
-            }
-            db.SaveChanges();
-            return Ok("修改成功");
+            
         }
         /// <summary>
         /// 上传EXCel
         /// </summary>
         /// <returns></returns>
         [HttpPost("Import")]
-        public IActionResult Import(IFormFile excelfile)
+        public async Task<IActionResult>  Import(IFormFile excelfile)
         {
             if (!ModelState.IsValid)
             {
@@ -138,13 +153,13 @@ namespace SMSApiManager.Controllers.Memberc
             if (!Regex.IsMatch(ExtenName, "(?s)|xls|xlsx(?-s)", RegexOptions.IgnoreCase))
             {
 
-                return BadRequest("对不起，xls|xlsx类型的文件");
+                return BadRequest("对不起，只允许上传xls或xlsx类型的文件");
             }
             string newname = DateTime.Now.ToString("yyyyMMddmmss") + new Random().Next(9999) + "." + ExtenName;
-            var path = Path.Combine(@"upload\xls", newname);
+            var path = Path.Combine(@"wwwroot\upload\xls", newname);
             var p = System.IO.Path.GetFullPath(path);
             //string sFileName = $"{Guid.NewGuid()}.xlsx";
-            FileInfo file = new FileInfo(Path.Combine(@"upload\xls", newname));
+            FileInfo file = new FileInfo(Path.Combine(@"wwwroot\upload\xls", newname));
             try
             {
                 using (FileStream fs = new FileStream(file.ToString(), FileMode.Create))
@@ -170,6 +185,8 @@ namespace SMSApiManager.Controllers.Memberc
                             {
                                 sb.Append(worksheet.Cells[row, col].Value.ToString() + "\t");
                                 s = worksheet.Cells[row, col].Value.ToString();
+                                var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+                                d.OwnerID = user.Id;
                                 switch (col)
                                 {
                                     case 2:
@@ -207,6 +224,11 @@ namespace SMSApiManager.Controllers.Memberc
                 return Content(ex.Message);
             }
         }
+        /// <summary>
+        /// 删除党员
+        /// </summary>
+        /// <param name="memberNo"></param>
+        /// <returns></returns>
         [HttpGet("delectMember")]
         public IActionResult DelectMember(string memberNo)
         {
@@ -223,6 +245,14 @@ namespace SMSApiManager.Controllers.Memberc
             db.SaveChanges();
             return Ok("删除成功");
         }
+        /// <summary>
+        /// 获取党员列表
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="sort"></param>
+        /// <param name="searchValue"></param>
+        /// <returns></returns>
         [HttpGet("getMembetList")]
         public IActionResult getMemberList(int pageSize,int pageIndex, string sort, string searchValue)
         {
@@ -269,15 +299,45 @@ namespace SMSApiManager.Controllers.Memberc
                 return BadRequest("暂无数据！");
             }
         }
+        /// <summary>
+        /// 批量删除党员
+        /// </summary>
+        /// <param name="memberNos"></param>
+        /// <returns></returns>
         [HttpPost("delectMemberList")]
-        public IActionResult DelectMemberList(List<string> memberNos)
+        public IActionResult DelectMemberList(List<int> memberIDs)
         {
-            var list = memberNos;
-            foreach (var memNo in memberNos)
+
+            Member member = null;
+            if (memberIDs.Count != 0)
             {
-                string test =memNo;
+                foreach (int id in memberIDs)
+                {
+                    try
+                    {
+                        member = db.Member.SingleOrDefault(x => x.MemberId == id);
+                        if (member != null)
+                        {
+                            member.Status = MemberStatus.Normal;
+                        }
+
+                    }
+                    catch (Exception)
+                    {
+
+                        throw new Exception("党员ID出错,删除失败");
+                    }
+
+                    db.SaveChanges();
+
+                }
+                return Ok("删除成功");
             }
-            return Ok("删除成功");
+            else
+            {
+                return BadRequest("参数错误!删除失败！");
+            }
+           
         }
 
         /// <summary>
