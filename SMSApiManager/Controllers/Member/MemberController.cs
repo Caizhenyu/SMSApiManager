@@ -58,7 +58,6 @@ namespace SMSApiManager.Controllers.Memberc
             //    OwnerID = member.OwnerID,
             //};
             var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-
             _member.OwnerID = user.Id;
             db.Member.Add(_member);
             db.SaveChanges();
@@ -140,7 +139,7 @@ namespace SMSApiManager.Controllers.Memberc
         /// </summary>
         /// <returns></returns>
         [HttpPost("Import")]
-        public IActionResult Import(IFormFile excelfile)
+        public async Task<IActionResult>  Import(IFormFile excelfile)
         {
             if (!ModelState.IsValid)
             {
@@ -154,13 +153,13 @@ namespace SMSApiManager.Controllers.Memberc
             if (!Regex.IsMatch(ExtenName, "(?s)|xls|xlsx(?-s)", RegexOptions.IgnoreCase))
             {
 
-                return BadRequest("对不起，xls|xlsx类型的文件");
+                return BadRequest("对不起，只允许上传xls或xlsx类型的文件");
             }
             string newname = DateTime.Now.ToString("yyyyMMddmmss") + new Random().Next(9999) + "." + ExtenName;
-            var path = Path.Combine(@"upload\xls", newname);
+            var path = Path.Combine(@"wwwroot\upload\xls", newname);
             var p = System.IO.Path.GetFullPath(path);
             //string sFileName = $"{Guid.NewGuid()}.xlsx";
-            FileInfo file = new FileInfo(Path.Combine(@"upload\xls", newname));
+            FileInfo file = new FileInfo(Path.Combine(@"wwwroot\upload\xls", newname));
             try
             {
                 using (FileStream fs = new FileStream(file.ToString(), FileMode.Create))
@@ -186,6 +185,8 @@ namespace SMSApiManager.Controllers.Memberc
                             {
                                 sb.Append(worksheet.Cells[row, col].Value.ToString() + "\t");
                                 s = worksheet.Cells[row, col].Value.ToString();
+                                var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+                                d.OwnerID = user.Id;
                                 switch (col)
                                 {
                                     case 2:
