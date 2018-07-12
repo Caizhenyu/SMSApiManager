@@ -56,6 +56,7 @@ namespace SMSApiManager.Controllers
             _logger = logger;
             _applicationDbContext = applicationDbContext;
             _mapper = mapper;
+
         }
 
         [AllowAnonymous]
@@ -72,13 +73,10 @@ namespace SMSApiManager.Controllers
 
             if (result.Succeeded)
             {
+                #region Get Role
                 var user = await _userManager.FindByEmailAsync(model.Email);
 
                 var roles = await _userManager.GetRolesAsync(user);
-                //var roles = from role in _applicationDbContext.Roles
-                //            join userRole in _applicationDbContext.UserRoles
-                //            on role.Id equals userRole.RoleId
-                //            select role.Name;
 
                 if (roles.Count() == 0)
                 {
@@ -111,6 +109,7 @@ namespace SMSApiManager.Controllers
 
                     roles = await _userManager.GetRolesAsync(user);
                 }
+                #endregion
 
 
                 //如果是基于用户的授权策略，这里要添加用户;如果是基于角色的授权策略，这里要添加角色
@@ -140,7 +139,6 @@ namespace SMSApiManager.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            //ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
                 return BadRequest(model);
@@ -156,11 +154,9 @@ namespace SMSApiManager.Controllers
                 var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
-                //await _signInManager.SignInAsync(user, isPersistent: false);
                 _logger.LogInformation("User created a new account with password.");
                 return Created("Login", model);
             }
-            //AddErrors(result);
 
             // If we got this far, something failed, redisplay form
             return StatusCode(409, result);
@@ -169,7 +165,7 @@ namespace SMSApiManager.Controllers
         [HttpGet(Name = "AccountDetail")]
         public async Task<IActionResult> Detail()
         {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
             var accountDetail = _mapper.Map<AccountDetailModel>(user);
 
             return Ok(accountDetail);
@@ -184,7 +180,7 @@ namespace SMSApiManager.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet]
+        [HttpGet(Name = "Denied")]
         public IActionResult Denied()
         {
             return Forbid();
@@ -208,6 +204,11 @@ namespace SMSApiManager.Controllers
             if(user == null)
             {
                 return NotFound("No this user");
+            }
+
+            if(user.Level == Level.System)
+            {
+                RedirectToLocal("Denied");
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);

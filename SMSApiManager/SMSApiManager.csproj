@@ -2,10 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <UserSecretsId>0ffbc325-8f32-4d74-bfda-738825c797ce</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Compile Remove="Migrations\20180702073458_Initial.cs" />
+    <Compile Remove="Migrations\20180702073458_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20180702082911_Birthday.cs" />
+    <Compile Remove="Migrations\20180702082911_Birthday.Designer.cs" />
+    <Compile Remove="Migrations\20180705060119_Initial1.cs" />
+    <Compile Remove="Migrations\20180705060119_Initial1.Designer.cs" />
+    <Compile Remove="Migrations\20180710011417_Model.cs" />
+    <Compile Remove="Migrations\20180710011417_Model.Designer.cs" />
+    <Compile Remove="Migrations\20180710011543_Model.cs" />
+    <Compile Remove="Migrations\20180710011543_Model.Designer.cs" />
+    <Compile Remove="Migrations\20180710011750_Model.cs" />
+    <Compile Remove="Migrations\20180710011750_Model.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,12 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AuthorizePolicy.JWT\AuthorizePolicy.JWT.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="upload\xls\" />
-    <Folder Include="wwwroot\" />
+    <None Include="wwwroot\upload\xls\2018070602336683.xlsx" />
   </ItemGroup>
 
 </Project>

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SMSApiManager.Authorization;
+using SMSApiManager.Configurations;
 using SMSApiManager.Data;
 using SMSApiManager.Models;
 using SMSApiManager.Services;
@@ -91,9 +92,9 @@ namespace SMSApiManager
             //这个集合模拟用户权限表,可从数据库中查询出来
             var permission = new List<Permission> {
                               new Permission {  Url="/", Name="Admin"},
-                              new Permission {  Url="/api/values", Name="Admin"},
-                              new Permission {  Url="/", Name="System"},
-                              new Permission {  Url="/api/values1", Name="System"}
+                              //new Permission {  Url="/api/values", Name="Admin"},
+                              //new Permission {  Url="/", Name="System"},
+                              //new Permission {  Url="/api/values1", Name="System"}
                           };
             //如果第三个参数，是ClaimTypes.Role，上面集合的每个元素的Name为角色名称，如果ClaimTypes.Name，即上面集合的每个元素的Name为用户名
             var permissionRequirement = new PermissionRequirement(

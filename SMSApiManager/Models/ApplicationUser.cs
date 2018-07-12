@@ -6,12 +6,6 @@ using System.Threading.Tasks;
 
 namespace SMSApiManager.Models
 {
-    public enum Level
-    {
-        Admin = 1,
-        SuperAdmin = 2,
-        System = 3
-    }
     public enum UserStatus
     {
         NoUse = 0,
@@ -27,7 +21,7 @@ namespace SMSApiManager.Models
         public string Address { get; set; }
 
         public Level Level { get; set; } = Level.Admin;
-        public UserStatus Status { get; set; }
+        public UserStatus Status { get; set; } = UserStatus.Normal;
         public string PermissionList { get; set; }
     }
 }

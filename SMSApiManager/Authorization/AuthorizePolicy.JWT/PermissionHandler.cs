@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using SMSApiManager.Models;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -56,10 +57,19 @@ namespace AuthorizePolicy.JWT
                 {
 
                     httpContext.User = result.Principal;
-                    //权限中是否存在请求的url
-                    if (requirement.Permissions.GroupBy(g => g.Url).Where(w => w.Key.ToLower() == questUrl).Count() > 0)
+                    var name = httpContext.User.Claims.SingleOrDefault(s => s.Type == requirement.ClaimType).Value;
+                    
+                    if(name == Level.System.ToString())
                     {
-                        var name = httpContext.User.Claims.SingleOrDefault(s => s.Type == requirement.ClaimType).Value;
+
+                    }
+                    //else if(name == Level.SuperAdmin.ToString())
+                    //{
+
+                    //}
+                    //权限中是否存在请求的url
+                    else if (requirement.Permissions.GroupBy(g => g.Url).Where(w => w.Key.ToLower() == questUrl).Count() > 0)
+                    {                        
                         //验证权限
                         if (requirement.Permissions.Where(w => w.Name == name && w.Url.ToLower() == questUrl).Count() <= 0)
                         {

@@ -27,7 +27,9 @@ namespace SMSApiManager.Models
         public int MemberId { get; set; }
 
         // user ID from AspNetUser table
-        public string OwnerID { get; set; }
+        [ForeignKey("User")]
+        [Required]
+        public string OwnerId { get; set; }
 
         public string MemberNo { get; set; }
         public string Name { get; set; }
@@ -45,5 +47,7 @@ namespace SMSApiManager.Models
         public MemberStatus Status { get; set; } = MemberStatus.Normal;
 
         public ContactStatus ContactStatus { get; set; }
+
+        public ApplicationUser User { get; set; }
     }
 }

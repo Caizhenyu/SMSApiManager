@@ -47,7 +47,7 @@ namespace SMSApiManager.Controllers.Memberc
                 Status = MemberStatus.Normal,
                 Email = member.Email,
                 Address = member.Address,
-                OwnerID = member.OwnerID,
+                OwnerId = member.OwnerId,
             };
             db.Member.Add(_member);
             db.SaveChanges();
