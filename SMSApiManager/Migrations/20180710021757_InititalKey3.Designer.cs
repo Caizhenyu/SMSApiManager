@@ -12,9 +12,10 @@ using System;
 namespace SMSApiManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180710021757_InititalKey3")]
+    partial class InititalKey3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,8 +242,7 @@ namespace SMSApiManager.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired();
+                    b.Property<string>("OwnerId");
 
                     b.Property<string>("PhoneNumber");
 
@@ -262,8 +262,7 @@ namespace SMSApiManager.Migrations
 
                     b.Property<int>("ApiId");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired();
+                    b.Property<string>("OwnerId");
 
                     b.Property<int>("SendCount");
 
@@ -327,8 +326,7 @@ namespace SMSApiManager.Migrations
                 {
                     b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("SMSApiManager.Models.Record", b =>
@@ -340,8 +338,7 @@ namespace SMSApiManager.Migrations
 
                     b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OwnerId");
                 });
 #pragma warning restore 612, 618
         }
