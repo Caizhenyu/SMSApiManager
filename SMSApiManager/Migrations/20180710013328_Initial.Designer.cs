@@ -12,9 +12,10 @@ using System;
 namespace SMSApiManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180710013328_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,6 +232,8 @@ namespace SMSApiManager.Migrations
 
                     b.Property<string>("Address");
 
+                    b.Property<string>("AppliactionUserID");
+
                     b.Property<DateTime>("Birthday");
 
                     b.Property<int>("ContactStatus");
@@ -241,15 +244,11 @@ namespace SMSApiManager.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("OwnerId");
-
                     b.Property<string>("PhoneNumber");
 
                     b.Property<int>("Status");
 
                     b.HasKey("MemberId");
-
-                    b.HasIndex("OwnerId");
 
                     b.ToTable("Member");
                 });
@@ -261,17 +260,11 @@ namespace SMSApiManager.Migrations
 
                     b.Property<int>("ApiId");
 
-                    b.Property<string>("OwnerId");
-
                     b.Property<int>("SendCount");
 
                     b.Property<DateTime>("SendTime");
 
                     b.HasKey("RecordId");
-
-                    b.HasIndex("ApiId");
-
-                    b.HasIndex("OwnerId");
 
                     b.ToTable("Record");
                 });
@@ -319,25 +312,6 @@ namespace SMSApiManager.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("SMSApiManager.Models.Member", b =>
-                {
-                    b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
-                });
-
-            modelBuilder.Entity("SMSApiManager.Models.Record", b =>
-                {
-                    b.HasOne("SMSApiManager.Models.Api", "Api")
-                        .WithMany()
-                        .HasForeignKey("ApiId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
                 });
 #pragma warning restore 612, 618
         }

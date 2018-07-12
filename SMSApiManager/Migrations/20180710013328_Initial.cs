@@ -10,6 +10,21 @@ namespace SMSApiManager.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Api",
+                columns: table => new
+                {
+                    ApiId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Address = table.Column<string>(nullable: true),
+                    ApiName = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Api", x => x.ApiId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -62,11 +77,12 @@ namespace SMSApiManager.Migrations
                     MemberId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Address = table.Column<string>(nullable: true),
+                    AppliactionUserID = table.Column<string>(nullable: true),
+                    Birthday = table.Column<DateTime>(nullable: false),
                     ContactStatus = table.Column<int>(nullable: false),
                     Email = table.Column<string>(nullable: true),
                     MemberNo = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    OwnerID = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     Status = table.Column<int>(nullable: false)
                 },
@@ -87,6 +103,21 @@ namespace SMSApiManager.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Permission", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Record",
+                columns: table => new
+                {
+                    RecordId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ApiId = table.Column<int>(nullable: false),
+                    SendCount = table.Column<int>(nullable: false),
+                    SendTime = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Record", x => x.RecordId);
                 });
 
             migrationBuilder.CreateTable(
@@ -238,6 +269,9 @@ namespace SMSApiManager.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Api");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -257,6 +291,9 @@ namespace SMSApiManager.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permission");
+
+            migrationBuilder.DropTable(
+                name: "Record");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

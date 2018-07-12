@@ -12,8 +12,8 @@ using System;
 namespace SMSApiManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180702073458_Initial")]
-    partial class Initial
+    [Migration("20180710020234_InitialKey2")]
+    partial class InitialKey2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -144,6 +144,22 @@ namespace SMSApiManager.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("SMSApiManager.Models.Api", b =>
+                {
+                    b.Property<int>("ApiId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Address");
+
+                    b.Property<string>("ApiName");
+
+                    b.Property<int>("Status");
+
+                    b.HasKey("ApiId");
+
+                    b.ToTable("Api");
+                });
+
             modelBuilder.Entity("SMSApiManager.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -216,6 +232,8 @@ namespace SMSApiManager.Migrations
 
                     b.Property<string>("Address");
 
+                    b.Property<DateTime>("Birthday");
+
                     b.Property<int>("ContactStatus");
 
                     b.Property<string>("Email");
@@ -224,7 +242,7 @@ namespace SMSApiManager.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("OwnerID");
+                    b.Property<string>("OwnerId");
 
                     b.Property<string>("PhoneNumber");
 
@@ -232,7 +250,31 @@ namespace SMSApiManager.Migrations
 
                     b.HasKey("MemberId");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("Member");
+                });
+
+            modelBuilder.Entity("SMSApiManager.Models.Record", b =>
+                {
+                    b.Property<int>("RecordId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("ApiId");
+
+                    b.Property<string>("OwnerId");
+
+                    b.Property<int>("SendCount");
+
+                    b.Property<DateTime>("SendTime");
+
+                    b.HasKey("RecordId");
+
+                    b.HasIndex("ApiId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Record");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -278,6 +320,25 @@ namespace SMSApiManager.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SMSApiManager.Models.Member", b =>
+                {
+                    b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+                });
+
+            modelBuilder.Entity("SMSApiManager.Models.Record", b =>
+                {
+                    b.HasOne("SMSApiManager.Models.Api", "Api")
+                        .WithMany()
+                        .HasForeignKey("ApiId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 #pragma warning restore 612, 618
         }
