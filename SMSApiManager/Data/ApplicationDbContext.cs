@@ -24,5 +24,6 @@ namespace SMSApiManager.Data
         public DbSet<Permission> Permission { get; set; }
         public DbSet<Api> Api { get; set; }
         public DbSet<Record> Record { get; set; }
+        public DbSet<UserApi> UserApi { get; set; }
     }
 }

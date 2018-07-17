@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using SMSApiManager.Data;
 using SMSApiManager.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -15,18 +17,24 @@ namespace AuthorizePolicy.JWT
     /// </summary>
     public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
     {
-        /// <summary>
-        /// 验证方案提供对象
-        /// </summary>
-        public IAuthenticationSchemeProvider Schemes { get; set; }
+        private IAuthenticationSchemeProvider _schemes { get; set; }
+
+        private ApplicationDbContext _applicationDbContext { get; set; }
+
+        private static IList<Permission> _permissions { get; set; }
 
         /// <summary>
         /// 构造
         /// </summary>
         /// <param name="schemes"></param>
-        public PermissionHandler(IAuthenticationSchemeProvider schemes)
+        public PermissionHandler(IAuthenticationSchemeProvider schemes,
+            ApplicationDbContext applicationDbContext)
         {
-            Schemes = schemes;
+            _schemes = schemes;
+            _applicationDbContext = applicationDbContext;
+
+            _permissions = _applicationDbContext.Permission.ToList();
+
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
@@ -38,7 +46,7 @@ namespace AuthorizePolicy.JWT
             var questUrl = httpContext.Request.Path.Value.ToLower();
             //判断请求是否停止
             var handlers = httpContext.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
-            foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
+            foreach (var scheme in await _schemes.GetRequestHandlerSchemesAsync())
             {
                 var handler = await handlers.GetHandlerAsync(httpContext, scheme.Name) as IAuthenticationRequestHandler;
                 if (handler != null && await handler.HandleRequestAsync())
@@ -48,7 +56,7 @@ namespace AuthorizePolicy.JWT
                 }
             }
             //判断请求是否拥有凭据，即有没有登录
-            var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
+            var defaultAuthenticate = await _schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)
             {
                 var result = await httpContext.AuthenticateAsync(defaultAuthenticate.Name);
@@ -68,10 +76,10 @@ namespace AuthorizePolicy.JWT
 
                     //}
                     //权限中是否存在请求的url
-                    else if (requirement.Permissions.GroupBy(g => g.Url).Where(w => w.Key.ToLower() == questUrl).Count() > 0)
+                    else if (_permissions.GroupBy(g => g.Url).Where(w => w.Key.ToLower() == questUrl).Count() > 0)
                     {                        
                         //验证权限
-                        if (requirement.Permissions.Where(w => w.Name == name && w.Url.ToLower() == questUrl).Count() <= 0)
+                        if (_permissions.Where(w => w.Name == name && w.Url.ToLower() == questUrl).Count() <= 0)
                         {
                             //无权限跳转到拒绝页面
                             httpContext.Response.Redirect(requirement.DeniedAction);

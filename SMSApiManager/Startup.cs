@@ -89,16 +89,10 @@ namespace SMSApiManager
             };
 
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            //这个集合模拟用户权限表,可从数据库中查询出来
-            var permission = new List<Permission> {
-                              new Permission {  Url="/", Name="Admin"},
-                              //new Permission {  Url="/api/values", Name="Admin"},
-                              //new Permission {  Url="/", Name="System"},
-                              //new Permission {  Url="/api/values1", Name="System"}
-                          };
+
             //如果第三个参数，是ClaimTypes.Role，上面集合的每个元素的Name为角色名称，如果ClaimTypes.Name，即上面集合的每个元素的Name为用户名
             var permissionRequirement = new PermissionRequirement(
-                "/api/denied", permission,
+                "/api/denied",
                 ClaimTypes.Role,
                 audienceConfig["Issuer"],
                 audienceConfig["Audience"],
@@ -108,7 +102,6 @@ namespace SMSApiManager
 
             services.AddAuthorization(options =>
             {
-
                 options.AddPolicy("Permission",
                           policy => policy.Requirements.Add(permissionRequirement));
 
@@ -126,7 +119,7 @@ namespace SMSApiManager
                 {
                     OnTokenValidated = context =>
                     {
-                        if (context.Request.Path.Value.ToString() == "/api/logout")
+                        if (context.Request.Path.Value.ToString() == "/api/account/logout")
                         {
                             var token = ((context as TokenValidatedContext).SecurityToken as JwtSecurityToken).RawData;
                         }
@@ -135,7 +128,7 @@ namespace SMSApiManager
                 };
             });
             //注入授权Handler
-            services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
             services.AddSingleton(permissionRequirement);
 
             // Add application services.
@@ -145,11 +138,11 @@ namespace SMSApiManager
             services.AddScoped<IAuthorizationHandler,
                                   ContactIsOwnerAuthorizationHandler>();
 
-            //services.AddSingleton<IAuthorizationHandler,
-            //                      ContactSuperAdminAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler,
+                                  ContactSuperAdminAuthorizationHandler>();
 
-            //services.AddSingleton<IAuthorizationHandler,
-            //                      ContactSystemAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler,
+                                  ContactSystemAuthorizationHandler>();
 
             //注入自动映射服务，提供 Model to DTO 和 DTO to Model 的映射
             services.AddAutoMapper();

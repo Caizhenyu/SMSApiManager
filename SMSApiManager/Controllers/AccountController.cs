@@ -73,8 +73,12 @@ namespace SMSApiManager.Controllers
 
             if (result.Succeeded)
             {
-                #region Get Role
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if(user.Status == UserStatus.NoUse)
+                {
+                    return Forbid("UserStatus : NoUse");
+                }
+                #region Get Role               
 
                 var roles = await _userManager.GetRolesAsync(user);
 
@@ -113,7 +117,7 @@ namespace SMSApiManager.Controllers
 
 
                 //如果是基于用户的授权策略，这里要添加用户;如果是基于角色的授权策略，这里要添加角色
-                var claims = new Claim[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.Role, roles.FirstOrDefault()), new Claim(ClaimTypes.Expiration, DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString()) };
+                var claims = new Claim[] { new Claim(ClaimTypes.Sid, user.Id), new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.Role, roles.FirstOrDefault()), new Claim(ClaimTypes.Expiration, DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString()) };
                 //用户标识
                 var identity = new ClaimsIdentity(JwtBearerDefaults.AuthenticationScheme);
                 identity.AddClaims(claims);
@@ -130,8 +134,7 @@ namespace SMSApiManager.Controllers
             else
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //return Ok(model);
-                return BadRequest(ModelState);
+                return BadRequest(model);
             }
         }
 
@@ -159,7 +162,7 @@ namespace SMSApiManager.Controllers
             }
 
             // If we got this far, something failed, redisplay form
-            return StatusCode(409, result);
+            return BadRequest(result.Errors);
         }
 
         [HttpGet(Name = "AccountDetail")]
@@ -196,7 +199,7 @@ namespace SMSApiManager.Controllers
             }
             if(string.IsNullOrEmpty(model.Code) || model.Code != "FakeFakeCode")
             {
-                return StatusCode(422, "Error Code");
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, "Error Code");
             }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -208,7 +211,7 @@ namespace SMSApiManager.Controllers
 
             if(user.Level == Level.System)
             {
-                RedirectToLocal("Denied");
+                //RedirectToLocal("Denied");
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -216,11 +219,11 @@ namespace SMSApiManager.Controllers
 
             if(identityResult.Succeeded)
             {
-                return StatusCode(204, "Reset Password Succeeded");
+                return StatusCode(StatusCodes.Status204NoContent, "Reset Password Succeeded");
             }
             else
             {
-                return StatusCode(500, identityResult.Errors);
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, identityResult.Errors);
             }
         }
 
@@ -228,7 +231,7 @@ namespace SMSApiManager.Controllers
         [AllowAnonymous]
         public IActionResult Lockout()
         {
-            return StatusCode(423, "Account Locked");
+            return StatusCode(StatusCodes.Status423Locked, "Account Locked");
         }
 
         [HttpGet]

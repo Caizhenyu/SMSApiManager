@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using SMSApiManager.Models;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SMSApiManager.Authorization
 {
     public class ContactIsOwnerAuthorizationHandler
-                : AuthorizationHandler<OperationAuthorizationRequirement, Member>
+                : AuthorizationHandler<OperationAuthorizationRequirement, IResource>
     {
         UserManager<ApplicationUser> _userManager;
 
@@ -20,7 +21,7 @@ namespace SMSApiManager.Authorization
         protected override Task
             HandleRequirementAsync(AuthorizationHandlerContext context,
                                    OperationAuthorizationRequirement requirement,
-                                   Member resource)
+                                   IResource resource)
         {
             if (context.User == null || resource == null)
             {
@@ -38,8 +39,9 @@ namespace SMSApiManager.Authorization
             {
                 return Task.CompletedTask;
             }
-
-            if (resource.OwnerId == _userManager.GetUserId(context.User))
+            
+            var userId = context.User.FindFirst(ClaimTypes.Sid).Value;
+            if (resource.OwnerId == userId)
             {
                 context.Succeed(requirement);
             }

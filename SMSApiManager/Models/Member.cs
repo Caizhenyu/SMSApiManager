@@ -21,7 +21,7 @@ namespace SMSApiManager.Models
         Rejected
     }
 
-    public class Member
+    public class Member : IResource
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MemberId { get; set; }

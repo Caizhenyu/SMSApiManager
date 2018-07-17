@@ -58,7 +58,7 @@ namespace SMSApiManager.Controllers.Memberc
             //    OwnerID = member.OwnerID,
             //};
             var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-            _member.OwnerID = user.Id;
+            _member.OwnerId = user.Id;
             db.Member.Add(_member);
             db.SaveChanges();
             return Ok("保存成功!");
@@ -186,7 +186,7 @@ namespace SMSApiManager.Controllers.Memberc
                                 sb.Append(worksheet.Cells[row, col].Value.ToString() + "\t");
                                 s = worksheet.Cells[row, col].Value.ToString();
                                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                                d.OwnerID = user.Id;
+                                d.OwnerId = user.Id;
                                 switch (col)
                                 {
                                     case 2:

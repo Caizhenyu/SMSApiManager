@@ -26,8 +26,5 @@ namespace SMSApiManager.Authorization
         public static readonly string DeleteOperationName = "Delete";
         //public static readonly string ApproveOperationName = "Approve";
         //public static readonly string RejectOperationName = "Reject";
-
-        public static readonly string ContactSuperAdminRole =             "SuperAdmin";
-        public static readonly string ContactSystemRole = "System";
     }
 }

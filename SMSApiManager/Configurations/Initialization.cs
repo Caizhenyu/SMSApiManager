@@ -19,8 +19,8 @@ namespace SMSApiManager.Configurations
             {
                 string password = "1234567890Ab";
                 var user = new ApplicationUser();
-                user.Email = "2521195169@qq.com";
-                user.UserName = "2521195169@qq.com"; 
+                user.Email = "2515595169@qq.com";
+                user.UserName = "2515595169@qq.com"; 
                 user.Name = "蔡振宇";
                 user.UserNo = "System001";
                 user.PhoneNumber = "18721206605";
@@ -39,7 +39,8 @@ namespace SMSApiManager.Configurations
             var newUser = await userManager.FindByEmailAsync(user.Email);
             if (newUser == null)
             {
-                await userManager.CreateAsync(user, password);
+                newUser = user;
+                await userManager.CreateAsync(newUser, password);
             }
 
             return newUser.Id;

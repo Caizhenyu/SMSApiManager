@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SMSApiManager.Authorization
+namespace SMSApiManager.Models
 {
-    public class ContactSystemAuthorizationHandler
+    public interface IResource
     {
+        string OwnerId { get; set; }
     }
 }

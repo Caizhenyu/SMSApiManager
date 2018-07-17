@@ -2,6 +2,7 @@
 using SMSApiManager.Models;
 using SMSApiManager.Models.ManageViewModels;
 using SMSApiManager.Models.MemberViewModles;
+using SMSApiManager.Models.UserApiViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,8 @@ namespace SMSApiManager.Configurations
         {
             CreateMap<ApplicationUser, AccountDetailModel>();
             CreateMap<MemberView, Member>();
+            CreateMap<CreateUserApiViewModel, UserApi>();
+            CreateMap<UserApi, UserApiDetailViewModel>();
         }         
 
     }
