@@ -12,9 +12,10 @@ using System;
 namespace SMSApiManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180713025024_ForeignKey")]
+    partial class ForeignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -284,31 +285,6 @@ namespace SMSApiManager.Migrations
                     b.ToTable("Record");
                 });
 
-            modelBuilder.Entity("SMSApiManager.Models.UserApi", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Address");
-
-                    b.Property<string>("ApiName");
-
-                    b.Property<string>("ApiNo");
-
-                    b.Property<string>("OwnerId")
-                        .IsRequired();
-
-                    b.Property<string>("Remark");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("UserApi");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
@@ -376,14 +352,6 @@ namespace SMSApiManager.Migrations
                         .HasForeignKey("ApiId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("SMSApiManager.Models.UserApi", b =>
-                {
                     b.HasOne("SMSApiManager.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("OwnerId")
