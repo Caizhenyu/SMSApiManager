@@ -11,7 +11,7 @@
 *.userprefs
 
 # Migration results
-[Mm]igrations
+[Mm]igrations/
 
 # Build results
 [Dd]ebug/
