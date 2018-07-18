@@ -10,13 +10,6 @@ namespace SMSApiManager.Authorization
     public class ContactIsOwnerAuthorizationHandler
                 : AuthorizationHandler<OperationAuthorizationRequirement, IResource>
     {
-        UserManager<ApplicationUser> _userManager;
-
-        public ContactIsOwnerAuthorizationHandler(UserManager<ApplicationUser>
-            userManager)
-        {
-            _userManager = userManager;
-        }
 
         protected override Task
             HandleRequirementAsync(AuthorizationHandlerContext context,
@@ -41,7 +34,7 @@ namespace SMSApiManager.Authorization
             }
             
             var userId = context.User.FindFirst(ClaimTypes.Sid).Value;
-            if (resource.OwnerId == userId)
+            if (resource.OwnerId.Contains(userId))
             {
                 context.Succeed(requirement);
             }

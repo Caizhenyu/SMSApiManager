@@ -289,11 +289,13 @@ namespace SMSApiManager.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Address");
+                    b.Property<string>("Address")
+                        .IsRequired();
 
                     b.Property<string>("ApiName");
 
-                    b.Property<string>("ApiNo");
+                    b.Property<string>("ApiNo")
+                        .IsRequired();
 
                     b.Property<string>("OwnerId")
                         .IsRequired();

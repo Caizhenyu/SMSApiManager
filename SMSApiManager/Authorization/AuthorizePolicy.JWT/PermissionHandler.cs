@@ -21,7 +21,7 @@ namespace AuthorizePolicy.JWT
 
         private ApplicationDbContext _applicationDbContext { get; set; }
 
-        private static IList<Permission> _permissions { get; set; }
+        private IList<Permission> _permissions { get; set; }
 
         /// <summary>
         /// 构造

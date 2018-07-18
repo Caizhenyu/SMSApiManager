@@ -221,7 +221,7 @@ namespace SMSApiManager.Controllers.Memberc
             }
             catch (Exception ex)
             {
-                return Content(ex.Message);
+                return Content(ex.InnerException.Message);
             }
         }
         /// <summary>

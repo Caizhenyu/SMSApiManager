@@ -2,7 +2,7 @@
 using SMSApiManager.Models;
 using SMSApiManager.Models.ManageViewModels;
 using SMSApiManager.Models.MemberViewModles;
-using SMSApiManager.Models.UserApiViewModels;
+using SMSApiManager.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
